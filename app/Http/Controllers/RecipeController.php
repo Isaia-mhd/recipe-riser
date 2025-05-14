@@ -1,0 +1,123 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Recipe;
+use Illuminate\Http\Request;
+
+class RecipeController extends Controller
+{
+    //get all recipes
+    public function index()
+    {
+        $recipes = Recipe::with('user')->orderBy('created_at', 'DESC')->get();
+        return view('pages.recipes.index', ["recipes" => $recipes]);
+    }
+
+    //show one recipe
+    public function show($recipe)
+    {
+        $recipe = Recipe::find($recipe);
+
+        if(!$recipe)
+        {
+            return redirect()->back()->with('error', 'Recipe does not exist.');
+        }
+
+        return view('pages.recipes.view', compact($recipe));
+    }
+
+    //create new recipe
+    public  function create()
+    {
+        return view('pages.recipes.new');
+    }
+
+    //Store a recipe
+    public  function store()
+    {
+
+        request()->validate([
+            'title' => 'required|string|min:3',
+            'description' => 'string|max:250',
+            'ingredients' => 'string',
+            'instructions' => 'required|string',
+            'image.*' => 'image|mimes:png,jpeg,jpg,avif,gif,svg|max:2048'
+        ]);
+
+        $urls = [];
+        if(request()->hasFile('image'))
+        {
+            $images = request()->file('image');
+            foreach ($images as $image)
+            {
+                $path = $image->store('recipes', 'public');
+                $urls[] = $path;
+            }
+        }
+
+        Recipe::create(
+            [
+                'user_id' => auth()->user()->id,
+                'image' => $urls
+            ],
+            request()->all()
+        );
+
+        return redirect()->route('index')->with('success', 'New Recipe Created.');
+    }
+
+    // Edit a Recipe
+    public  function edit($recipe)
+    {
+        $recipe = Recipe::find($recipeId);
+        if(!$recipe)
+        {
+            return redirect()->back()->with('error', 'Recipe does not exist.');
+        }
+
+        return view('pages.recipes.edit', compact($recipe));
+
+    }
+
+    //Update a Recipe
+    public  function update(Recipe $recipe)
+    {
+        request()->validate([
+            'title' => 'required|string|min:3',
+            'description' => 'string|max:250',
+            'ingredients' => 'required|string',
+            'instructions' => 'required|string',
+            'image.*' => 'image|mimes:png,jpeg,jpg,avif,gif,svg|max:2048'
+        ]);
+
+        $urls = [];
+        if(request()->hasFile('image'))
+        {
+            $images = request()->file('image');
+            foreach ($images as $image)
+            {
+                $path = $image->store('recipes', 'public');
+                $urls[] = $path;
+            }
+        }
+
+        $recipe->update(
+            [
+                'user_id' => auth()->user()->id,
+                'image' => $urls
+            ],
+            request()->all()
+        );
+
+        return redirect()->route('index')->with('success', 'Recipe Updated.');
+    }
+
+    //Delete a Recipe
+    public  function destroy(Recipe $recipe)
+    {
+        $recipeId->delete();
+
+        return redirect()->back()->with('success', 'Recipe Deleted.');
+    }
+}
