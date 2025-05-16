@@ -26,9 +26,9 @@
                 >Recipes</a>
 
                 <a
-                    href="community"
+                    href="{{ route('recipe.create') }}"
                     class="text-gray-300 hover:text-amber-400 transition"
-                >Community</a>
+                >New</a>
 
                 <form action="{{ route('auth.logout') }}" method="POST">
                     @csrf

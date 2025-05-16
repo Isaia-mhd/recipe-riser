@@ -37,34 +37,33 @@ class RecipeController extends Controller
     public  function store()
     {
 
-        request()->validate([
+        $validated = request()->validate([
             'title' => 'required|string|min:3',
             'description' => 'string|max:250',
             'ingredients' => 'string',
             'instructions' => 'required|string',
-            'image.*' => 'image|mimes:png,jpeg,jpg,avif,gif,svg|max:2048'
+            'images.*' => 'image|mimes:png,jpeg,jpg,avif,gif,svg|max:2048'
         ]);
 
-        $urls = [];
-        if(request()->hasFile('image'))
-        {
-            $images = request()->file('image');
-            foreach ($images as $image)
-            {
+        $url = [];
+        if (request()->hasFile('images')) {
+            foreach (request()->file('images') as $image) {
                 $path = $image->store('recipes', 'public');
-                $urls[] = $path;
+                $url[] = $path;
             }
         }
+        Recipe::create([
+            'user_id' => auth()->id(),
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'ingredients' => $validated['ingredients'],
+            'instructions' => $validated['instructions'],
+            'image' => json_encode($url, JSON_FORCE_OBJECT)
+        ]);
 
-        Recipe::create(
-            [
-                'user_id' => auth()->user()->id,
-                'image' => $urls
-            ],
-            request()->all()
-        );
 
-        return redirect()->route('index')->with('success', 'New Recipe Created.');
+
+        return redirect()->route('recipe.index')->with('success', 'New Recipe Created.');
     }
 
     // Edit a Recipe

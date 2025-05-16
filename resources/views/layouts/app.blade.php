@@ -7,11 +7,12 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title> {{ config('app.name') }} </title>
     @vite('resources/css/app.css')
+    <script src="https://kit.fontawesome.com/30b351febc.js" crossorigin="anonymous"></script>
 </head>
-<body>
+<body class="bg-slate-900">
     @include('components.header')
 
-    <section class="bg-green-400">
+    <section class="">
         @yield('body')
     </section>
 
