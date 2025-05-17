@@ -3,12 +3,25 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\Auth\AuthController;
+use \App\Http\Controllers\CommentController;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
 Route::middleware('auth',)->group(function (){
+
+    //Notifications
+    Route::get('notifications', function (){
+        $user = auth()->user();
+        $notifications = $user->notifications;
+        $user->unreadNotifications->markAsRead();
+       return view('pages.auth.notifications', ['notifications' => $notifications]);
+    })->name('notifications');
+    // COMMENTS
+    Route::post("comments/new/recipe/{recipe}", [CommentController::class,"store"])->name('comment.new');
+    Route::delete("comments/delete/{comment}", [CommentController::class,"destroy"])->name('comment.delete');
+
     Route::delete('recipes/delete/{recipe}', [RecipeController::class, 'destroy'])->name('recipe.delete');
     Route::put('recipes/update/{recipe}', [RecipeController::class, 'update'])->name('recipe.update');
     Route::get('recipes/edit/{recipe}', [RecipeController::class, 'edit'])->name('recipe.edit');

@@ -10,7 +10,7 @@ class RecipeController extends Controller
     //get all recipes
     public function index()
     {
-        $recipes = Recipe::with('user')->orderBy('created_at', 'DESC')->get();
+        $recipes = Recipe::with('user', 'comments')->orderBy('created_at', 'DESC')->get();
         return view('pages.recipes.index', ["recipes" => $recipes]);
     }
 
